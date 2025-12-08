@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ To-Do List Pro - Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --accent: #48bb78;
+            --accent-hover: #38a169;
+            --delete: #f56565;
+            --delete-hover: #e53e3e;
+            --shadow: 0 25px 45px rgba(0,0,0,0.1);
+            --shadow-hover: 0 35px 60px rgba(0,0,0,0.15);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-primary);
+            min-height: 100vh; 
+            padding: 20px;
+            overflow-x: hidden;
+            animation: bgShift 15s ease infinite;
+        }
+        
+        @keyframes bgShift {
+            0%, 100% { background: var(--bg-primary); }
+            50% { background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%); }
+        }
+        
+        .container { 
+            max-width: 550px; 
+            margin: 40px auto; 
+            backdrop-filter: blur(20px);
+            animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        h1 { 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            background: linear-gradient(135deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            position: relative; z-index: 1;
+        }
+        
+        .subtitle { 
+            color: rgba(255,255,255,0.9); 
+            font-weight: 300; 
+            font-size: 1.1rem;
+        }
+        
+        .input-section { 
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            display: flex; 
+            gap: 15px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .input-section:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+        
+        input[type="text"] { 
+            flex: 1; 
+            padding: 18px 25px; 
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 20px; 
+            font-size: 16px;
+            font-weight: 400;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.02);
+        }
+        
+        input[type="text"]::placeholder { color: rgba(255,255,255,0.7); }
+        
+        button { 
+            padding: 18px 30px; 
+            border: none; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .add-btn { 
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            min-width: 140px;
+        }
+        
+        .add-btn:hover { 
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .tasks { 
+            list-style: none; 
+            max-height: 500px; 
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        
+        .tasks::-webkit-scrollbar { width: 6px; }
+        .tasks::-webkit-scrollbar-track { background: transparent; }
+        .tasks::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        
+        .task { 
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 15px;
+            padding: 20px 25px;
+            display: flex; 
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: taskSlide 0.5s ease forwards;
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        
+        @keyframes taskSlide {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .task:hover { 
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .task.completed { 
+            opacity: 0.7; 
+            background: rgba(72, 187, 120, 0.15);
+            border-color: rgba(72, 187, 120, 0.3);
+        }
+        
+        .task.completed .task-text { 
+            text-decoration: line-through; 
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .task-checkbox { 
+            width: 22px; 
+            height: 22px; 
+            margin-right: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            transform: scale(1.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .task-checkbox:hover { transform: scale(1.2); }
+        
+        .task-text { 
+            flex: 1; 
+            font-size: 16px; 
+            font-weight: 400;
+            color: white;
+            line-height: 1.5;
+        }
+        
+        .task-actions { display: flex; gap: 10px; }
+        
+        .edit-btn, .delete-btn {
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 15px;
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .edit-btn { 
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+        }
+        
+        .delete-btn { 
+            background: linear-gradient(135deg, var(--delete), var(--delete-hover));
+            color: white;
+        }
+        
+        .edit-btn:hover, .delete-btn:hover { 
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .clear-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        
+        .clear-btn { 
+            background: linear-gradient(135deg, #a0aec0, #718096);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .clear-btn:hover { 
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 300;
+        }
+        
+        @media (max-width: 600px) { 
+            .container { margin: 20px auto; padding: 0 10px; }
+            .input-section { flex-direction: column; }
+            h1 { font-size: 1.8rem; }
+            .task-actions { flex-direction: column; gap: 8px; }
+            .edit-btn, .delete-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ TaskFlow Pro</h1>
+            <p class="subtitle">Stay organized with style</p>
+        </div>
+        
+        <div class="input-section">
+            <input type="text" id="taskInput" placeholder="💡 What needs to be done today?" maxlength="120">
+            <button class="add-btn" onclick="addTask()">
+                <span>➕ Add</span>
+            </button>
+        </div>
+        
+        <ul class="tasks" id="taskList"></ul>
+        
+        <div class="clear-section">
+            <div class="stats">
+                <span id="totalTasks">0 tasks</span>
+                <span id="completedTasks">0 done</span>
+            </div>
+            <button class="clear-btn" onclick="clearCompleted()">
+                🗑️ Clear Completed
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let taskIdCounter = tasks.length;
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateStats();
+            renderTasks();
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            if (text) {
+                tasks.push({ id: taskIdCounter++, text, completed: false });
+                input.value = '';
+                input.blur();
+                saveTasks();
+            }
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveTasks();
+            }
+        }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                const newText = prompt('Edit task:', task.text);
+                if (newText !== null && newText.trim()) {
+                    task.text = newText.trim();
+                    saveTasks();
+                }
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+        }
+
+        function clearCompleted() {
+            tasks = tasks.filter(task => !task.completed);
+            saveTasks();
+        }
+
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            document.getElementById('totalTasks').textContent = `${total} ${total === 1 ? 'task' : 'tasks'}`;
+            document.getElementById('completedTasks').textContent = `${completed} done`;
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = tasks.map((task, index) => `
+                <li class="task ${task.completed ? 'completed' : ''}" style="animation-delay: ${index * 0.1}s">
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">
+                    <span class="task-text">${task.text}</span>
+                    <div class="task-actions">
+                        <button class="edit-btn" onclick="editTask(${task.id})" title="Edit">
+                            ✏️ Edit
+                        </button>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})" title="Delete">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addTask();
+        });
+
+        // Auto-focus input
+        document.getElementById('taskInput').focus();
+
+        updateStats();
+        renderTasks();
+    </script>
+</body>
+</html>
